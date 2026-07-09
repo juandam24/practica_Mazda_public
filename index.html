@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist diario - Práctica Mazda</title>
+
+  <style>
+    :root {
+      --bg: #f4f6f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --red: #dc2626;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --green: #16a34a;
+      --blue: #2563eb;
+      --gray: #374151;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 28px;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+    }
+
+    .header {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-bottom: 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .top-row {
+      display: grid;
+      grid-template-columns: 1fr 190px;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .date-box label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input[type="date"], textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: Arial, sans-serif;
+    }
+
+    .face {
+      font-size: 76px;
+      text-align: center;
+      transition: transform 0.2s ease;
+    }
+
+    .face:hover {
+      transform: scale(1.07);
+    }
+
+    .progress-wrapper {
+      margin-top: 22px;
+    }
+
+    .score {
+      font-size: 23px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .message {
+      color: var(--gray);
+      margin-bottom: 12px;
+    }
+
+    .progress-container {
+      height: 30px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--red);
+      color: white;
+      font-weight: bold;
+      text-align: center;
+      line-height: 30px;
+      transition: width 0.3s ease, background 0.3s ease;
+    }
+
+    .alerts {
+      margin-top: 18px;
+      padding: 15px;
+      background: #fff7ed;
+      border-left: 5px solid var(--orange);
+      border-radius: 12px;
+      display: none;
+    }
+
+    .alerts strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+
+    .task-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border: 1px solid transparent;
+    }
+
+    .task-card.warning {
+      border: 1px solid #fed7aa;
+      background: #fffaf5;
+    }
+
+    .task-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .task-title h2 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    .badge {
+      font-size: 12px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .badge.ok {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .badge.pending {
+      background: #ffedd5;
+      color: #9a3412;
+    }
+
+    .people {
+      color: var(--muted);
+      margin-bottom: 15px;
+      font-size: 14px;
+    }
+
+    .task-progress-text {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 7px;
+    }
+
+    .mini-progress {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 15px;
+    }
+
+    .mini-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--blue);
+      transition: width 0.3s ease;
+    }
+
+    label.check-item {
+      display: block;
+      margin: 9px 0;
+      padding: 10px 11px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease, border 0.2s ease;
+    }
+
+    label.check-item:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+    }
+
+    input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.15);
+    }
+
+    .note {
+      margin-top: 15px;
+      padding: 12px;
+      background: #f9fafb;
+      border-radius: 10px;
+      color: var(--gray);
+      font-size: 14px;
+    }
+
+    .notes-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-top: 22px;
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+      margin-top: 10px;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 11px 16px;
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      filter: brightness(0.95);
+    }
+
+    .copy {
+      background: var(--blue);
+    }
+
+    .reset {
+      background: var(--red);
+    }
+
+    .export {
+      background: var(--green);
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    @media (max-width: 850px) {
+      .grid, .top-row {
+        grid-template-columns: 1fr;
+      }
+
+      .face {
+        font-size: 60px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <div class="header">
+      <h1>Checklist diario - Práctica Mazda</h1>
+      <div class="subtitle">
+        Control personal para registrar avance diario, pendientes y validaciones de tareas.
+      </div>
+
+      <div class="top-row">
+        <div class="date-box">
+          <label for="workDate">Fecha del registro</label>
+          <input type="date" id="workDate">
+        </div>
+
+        <div class="face" id="face">😞</div>
+      </div>
+
+      <div class="progress-wrapper">
+        <div class="score" id="scoreText">Avance diario: 0%</div>
+        <div class="message" id="messageText">Estado: día no iniciado.</div>
+
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar">0%</div>
+        </div>
+      </div>
+
+      <div class="alerts" id="alertsBox">
+        <strong>Te falta esto:</strong>
+        <ul id="alertsList"></ul>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <div class="task-card warning" data-task="intelcia">
+        <div class="task-title">
+          <h2>1. Proyecto Intelcia</h2>
+          <span class="badge pending">Por aclarar</span>
+        </div>
+
+        <div class="people">
+          Personas: María Nelly e Iván
+        </div>
+
+        <div class="task-progress-text" id="progress-intelcia">Progreso: 0%</div>
+        <div class="mini-progress"><div class="mini-bar" id="bar-intelcia"></div></div>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="intelcia">
+          Confirmar objetivo del proyecto.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="intelcia">
+          Confirmar entregables esperados.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="intelcia">
+          Confirmar frecuencia de actualización o seguimiento.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="intelcia">
+          Preguntar qué fuente de datos o archivo se debe usar.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="intelcia">
+          Registrar dudas o pendientes para María Nelly / Iván.
+        </label>
+
+        <div class="note">
+          Esta tarea todavía está en etapa de definición. No marcar como cerrada hasta tener procedimiento claro.
+        </div>
+      </div>
+
+      <div class="task-card" data-task="inventario">
+        <div class="task-title">
+          <h2>2. Inventario Virtual</h2>
+          <span class="badge ok">Procedimiento claro</span>
+        </div>
+
+        <div class="people">
+          Persona: Robinson
+        </div>
+
+        <div class="task-progress-text" id="progress-inventario">Progreso: 0%</div>
+        <div class="mini-progress"><div class="mini-bar" id="bar-inventario"></div></div>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="inventario">
+          Acceder al Inventario Virtual de Mazda.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="inventario">
+          Exportar el archivo correspondiente.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="inventario">
+          Verificar que el archivo exportado tenga fecha/datos correctos.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="inventario">
+          Pasar la información al Excel compartido.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="inventario">
+          Guardar y confirmar que el Excel compartido quedó actualizado.
+        </label>
+      </div>
+
+      <div class="task-card" data-task="voc">
+        <div class="task-title">
+          <h2>3. Informe VOC</h2>
+          <span class="badge ok">Procedimiento claro</span>
+        </div>
+
+        <div class="people">
+          Persona: Nini Benjarano
+        </div>
+
+        <div class="task-progress-text" id="progress-voc">Progreso: 0%</div>
+        <div class="mini-progress"><div class="mini-bar" id="bar-voc"></div></div>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Acceder a Salesforce.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Obtener información de encuestas de satisfacción de clientes.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Exportar o copiar la información necesaria.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Categorizar las encuestas según el criterio indicado.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Actualizar el Excel correspondiente.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Validar que no falten registros o categorías.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Enviar correo diario a Nini Benjarano.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="voc">
+          Adjuntar el Excel actualizado en el correo.
+        </label>
+      </div>
+
+      <div class="task-card warning" data-task="campanas">
+        <div class="task-title">
+          <h2>4. Informe de Campañas</h2>
+          <span class="badge pending">Por aclarar</span>
+        </div>
+
+        <div class="people">
+          Personas: por definir
+        </div>
+
+        <div class="task-progress-text" id="progress-campanas">Progreso: 0%</div>
+        <div class="mini-progress"><div class="mini-bar" id="bar-campanas"></div></div>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Confirmar fuente principal del informe.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Confirmar si la actualización se hace desde Power BI Desktop o Power BI Service.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Confirmar permisos a Salesforce, SharePoint, dataflows y archivos fuente.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Ejecutar actualización del informe cuando existan permisos.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Validar afectados, atendidos, pendientes y porcentaje de avance.
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" class="check" data-task="campanas">
+          Confirmar si se debe publicar o solo guardar.
+        </label>
+
+        <div class="note">
+          Esta tarea todavía requiere empalme. Prioridad: entender fuente, responsable, frecuencia y forma de entrega.
+        </div>
+      </div>
+
+    </div>
+
+    <div class="notes-card">
+      <h2>Observaciones del día</h2>
+      <textarea id="notes" placeholder="Escribe aquí novedades, errores, permisos faltantes, correos enviados, dudas o decisiones del día..."></textarea>
+
+      <div class="buttons">
+        <button class="copy" onclick="copySummary()">Copiar resumen diario</button>
+        <button class="export" onclick="exportCSV()">Exportar CSV del día</button>
+        <button class="reset" onclick="resetDay()">Reiniciar día</button>
+      </div>
+    </div>
+
+    <div class="footer">
+      No incluir VIN, placas, nombres de clientes, contraseñas, rutas internas ni información confidencial.
+    </div>
+  </div>
+
+  <script>
+    const checks = document.querySelectorAll(".check");
+    const progressBar = document.getElementById("progressBar");
+    const scoreText = document.getElementById("scoreText");
+    const messageText = document.getElementById("messageText");
+    const face = document.getElementById("face");
+    const alertsBox = document.getElementById("alertsBox");
+    const alertsList = document.getElementById("alertsList");
+    const notes = document.getElementById("notes");
+    const workDate = document.getElementById("workDate");
+
+    const taskNames = {
+      intelcia: "Proyecto Intelcia",
+      inventario: "Inventario Virtual",
+      voc: "Informe VOC",
+      campanas: "Informe de Campañas"
+    };
+
+    function todayISO() {
+      const today = new Date();
+      const offset = today.getTimezoneOffset();
+      const localDate = new Date(today.getTime() - offset * 60 * 1000);
+      return localDate.toISOString().split("T")[0];
+    }
+
+    function getStorageKey() {
+      return "mazda_checklist_" + workDate.value;
+    }
+
+    function getTaskStats(task) {
+      const taskChecks = Array.from(document.querySelectorAll(`.check[data-task="${task}"]`));
+      const completed = taskChecks.filter(check => check.checked).length;
+      const total = taskChecks.length;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+      return { completed, total, percent };
+    }
+
+    function updateTaskProgress() {
+      Object.keys(taskNames).forEach(task => {
+        const stats = getTaskStats(task);
+        document.getElementById(`progress-${task}`).textContent =
+          `Progreso: ${stats.percent}% (${stats.completed}/${stats.total})`;
+
+        document.getElementById(`bar-${task}`).style.width = stats.percent + "%";
+      });
+    }
+
+    function updateGlobalProgress() {
+      const total = checks.length;
+      const completed = Array.from(checks).filter(check => check.checked).length;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      progressBar.style.width = percent + "%";
+      progressBar.textContent = percent + "%";
+      scoreText.textContent = `Avance diario: ${percent}% (${completed}/${total})`;
+
+      if (percent < 30) {
+        face.textContent = "😞";
+        messageText.textContent = "Estado: faltan muchas tareas críticas.";
+        progressBar.style.background = "#dc2626";
+      } else if (percent < 60) {
+        face.textContent = "😐";
+        messageText.textContent = "Estado: avance parcial. Todavía hay pendientes importantes.";
+        progressBar.style.background = "#f97316";
+      } else if (percent < 80) {
+        face.textContent = "🙂";
+        messageText.textContent = "Estado: buen avance, pero aún faltan validaciones.";
+        progressBar.style.background = "#eab308";
+      } else if (percent < 100) {
+        face.textContent = "😄";
+        messageText.textContent = "Estado: casi completo. Revisa pendientes antes de cerrar el día.";
+        progressBar.style.background = "#22c55e";
+      } else {
+        face.textContent = "🏆";
+        messageText.textContent = "Estado: día completamente registrado.";
+        progressBar.style.background = "#16a34a";
+      }
+    }
+
+    function updateAlerts() {
+      const alerts = [];
+
+      Object.keys(taskNames).forEach(task => {
+        const stats = getTaskStats(task);
+
+        if (stats.percent < 100) {
+          alerts.push(`${taskNames[task]}: faltan ${stats.total - stats.completed} punto(s).`);
+        }
+      });
+
+      const intelciaStats = getTaskStats("intelcia");
+      const campanasStats = getTaskStats("campanas");
+      const vocStats = getTaskStats("voc");
+      const inventarioStats = getTaskStats("inventario");
+
+      if (intelciaStats.percent < 100) {
+        alerts.push("Proyecto Intelcia: todavía debes aclarar objetivo, entregables o fuente de datos.");
+      }
+
+      if (campanasStats.percent < 100) {
+        alerts.push("Informe de Campañas: falta definir procedimiento completo y permisos.");
+      }
+
+      if (vocStats.percent < 100) {
+        alerts.push("Informe VOC: recuerda enviar correo diario a Nini con el Excel adjunto.");
+      }
+
+      if (inventarioStats.percent < 100) {
+        alerts.push("Inventario Virtual: recuerda pasar la exportación al Excel compartido.");
+      }
+
+      alertsList.innerHTML = "";
+
+      if (alerts.length === 0) {
+        alertsBox.style.display = "none";
+      } else {
+        alertsBox.style.display = "block";
+        alerts.forEach(alert => {
+          const li = document.createElement("li");
+          li.textContent = alert;
+          alertsList.appendChild(li);
+        });
+      }
+    }
+
+    function saveState() {
+      const state = {
+        date: workDate.value,
+        checks: Array.from(checks).map(check => check.checked),
+        notes: notes.value
+      };
+
+      localStorage.setItem(getStorageKey(), JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem(getStorageKey());
+
+      checks.forEach(check => check.checked = false);
+      notes.value = "";
+
+      if (saved) {
+        const state = JSON.parse(saved);
+
+        checks.forEach((check, index) => {
+          check.checked = state.checks[index] || false;
+        });
+
+        notes.value = state.notes || "";
+      }
+
+      updateAll(false);
+    }
+
+    function updateAll(shouldSave = true) {
+      updateTaskProgress();
+      updateGlobalProgress();
+      updateAlerts();
+
+      if (shouldSave) {
+        saveState();
+      }
+    }
+
+    function copySummary() {
+      const total = checks.length;
+      const completed = Array.from(checks).filter(check => check.checked).length;
+      const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+      let taskSummary = "";
+
+      Object.keys(taskNames).forEach(task => {
+        const stats = getTaskStats(task);
+        taskSummary += `\n- ${taskNames[task]}: ${stats.percent}% (${stats.completed}/${stats.total})`;
+      });
+
+      const summary =
+`Resumen diario - Práctica Mazda
+Fecha: ${workDate.value}
+Avance total: ${percent}% (${completed}/${total})
+${taskSummary}
+
+Estado:
+${messageText.textContent}
+
+Observaciones:
+${notes.value || "Sin observaciones."}`;
+
+      navigator.clipboard.writeText(summary);
+      alert("Resumen copiado al portapapeles.");
+    }
+
+    function exportCSV() {
+      const rows = [];
+      rows.push(["fecha", "tarea", "progreso_porcentaje", "completadas", "total", "observaciones"]);
+
+      Object.keys(taskNames).forEach(task => {
+        const stats = getTaskStats(task);
+        rows.push([
+          workDate.value,
+          taskNames[task],
+          stats.percent,
+          stats.completed,
+          stats.total,
+          notes.value.replace(/\n/g, " ")
+        ]);
+      });
+
+      const csv = rows.map(row =>
+        row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      ).join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `registro_practica_${workDate.value}.csv`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    function resetDay() {
+      if (confirm("¿Seguro que quieres reiniciar el checklist de este día?")) {
+        checks.forEach(check => check.checked = false);
+        notes.value = "";
+        localStorage.removeItem(getStorageKey());
+        updateAll(false);
+      }
+    }
+
+    checks.forEach(check => {
+      check.addEventListener("change", () => updateAll(true));
+    });
+
+    notes.addEventListener("input", () => updateAll(true));
+
+    workDate.addEventListener("change", loadState);
+
+    workDate.value = todayISO();
+    loadState();
+  </script>
+</body>
+</html>
